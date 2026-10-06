@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">سالم</string>
+    <string name="app_tagline">مراسلة شبكية بدون إنترنت</string>
+    <string name="tab_chats">المحادثات</string>
+    <string name="tab_nearby">القريبون</string>
+    <string name="tab_channels">القنوات</string>
+    <string name="tab_settings">الإعدادات</string>
+    <string name="mesh_active">الشبكة نشطة</string>
+    <string name="channel_public_title">القناة العامة القريبة</string>
+    <string name="channel_public_banner">بث عام. يمكن لأي شخص في شبكة البلوتوث قراءة هذه الرسائل.</string>
+    <string name="sos_broadcast_title">استغاثة طارئة</string>
+    <string name="panic_wipe_button">مسح جميع البيانات فوراً</string>
+</resources>

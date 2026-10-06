@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">সালিম</string>
+    <string name="app_tagline">অফলাইন মেশ মেসেঞ্জার</string>
+    <string name="tab_chats">চ্যাট</string>
+    <string name="tab_nearby">কাছাকাছি</string>
+    <string name="tab_channels">চ্যানেল</string>
+    <string name="tab_settings">সেটিংস</string>
+    <string name="mesh_active">মেশ সক্রিয়</string>
+    <string name="channel_public_title">পাবলিক নিকটবর্তী চ্যানেল</string>
+    <string name="channel_public_banner">পাবলিক সম্প্রচার। ব্লুটুথ মেশে থাকা যে কেউ এই বার্তাগুলো পড়তে পারবে।</string>
+    <string name="sos_broadcast_title">জরুরি এসওএস (SOS)</string>
+    <string name="panic_wipe_button">সমস্ত ডেটা অবিলম্বে মুছে ফেলুন</string>
+</resources>

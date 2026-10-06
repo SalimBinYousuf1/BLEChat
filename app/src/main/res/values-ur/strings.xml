@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">سالم</string>
+    <string name="app_tagline">آف لائن میش میسنجر</string>
+    <string name="tab_chats">چیٹس</string>
+    <string name="tab_nearby">قریبی</string>
+    <string name="tab_channels">چینلز</string>
+    <string name="tab_settings">ترتیبات</string>
+    <string name="mesh_active">میش فعال ہے</string>
+    <string name="channel_public_title">قریبی پبلک چینل</string>
+    <string name="channel_public_banner">عوامی نشریات۔ بلوٹوتھ میش میں کوئی بھی شخص یہ پیغامات پڑھ سکتا ہے۔</string>
+    <string name="sos_broadcast_title">ہنگامی امداد (SOS)</string>
+    <string name="panic_wipe_button">تمام ڈیٹا فوری صاف کریں</string>
+</resources>

@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">Salim</string>
+    <string name="app_tagline">Messagerie maillée hors ligne</string>
+    <string name="tab_chats">Discussions</string>
+    <string name="tab_nearby">À proximité</string>
+    <string name="tab_channels">Canaux</string>
+    <string name="tab_settings">Paramètres</string>
+    <string name="mesh_active">Réseau actif</string>
+    <string name="channel_public_title">Canal public de proximité</string>
+    <string name="channel_public_banner">Diffusion publique. Tout appareil dans le réseau Bluetooth peut lire ces messages.</string>
+    <string name="sos_broadcast_title">URGENCE SOS</string>
+    <string name="panic_wipe_button">Effacer toutes les données immédiatement</string>
+</resources>

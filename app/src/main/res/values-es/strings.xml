@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">Salim</string>
+    <string name="app_tagline">Mensajería en malla sin conexión</string>
+    <string name="tab_chats">Chats</string>
+    <string name="tab_nearby">Cercanos</string>
+    <string name="tab_channels">Canales</string>
+    <string name="tab_settings">Ajustes</string>
+    <string name="mesh_active">Malla activa</string>
+    <string name="channel_public_title">Canal público cercano</string>
+    <string name="channel_public_banner">Difusión pública. Cualquiera en la malla Bluetooth puede leer estos mensajes.</string>
+    <string name="sos_broadcast_title">SOS DE EMERGENCIA</string>
+    <string name="panic_wipe_button">Borrar todos los datos ahora</string>
+</resources>

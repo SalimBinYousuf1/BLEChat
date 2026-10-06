@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">सलीम</string>
+    <string name="app_tagline">ऑफलाइन मेश मैसेंजर</string>
+    <string name="tab_chats">चैट</string>
+    <string name="tab_nearby">आस-पास</string>
+    <string name="tab_channels">चैनल</string>
+    <string name="tab_settings">सेटिंग्स</string>
+    <string name="mesh_active">मेश सक्रिय</string>
+    <string name="channel_public_title">सार्वजनिक स्थानीय चैनल</string>
+    <string name="channel_public_banner">सार्वजनिक प्रसारण। ब्लूटूथ मेश में मौजूद कोई भी व्यक्ति इन संदेशों को पढ़ सकता है।</string>
+    <string name="sos_broadcast_title">आपातकालीन संकट (SOS)</string>
+    <string name="panic_wipe_button">सारा डेटा तुरंत मिटाएं</string>
+</resources>

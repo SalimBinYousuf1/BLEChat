@@ -1,0 +1,6 @@
+{
+  "name": "Salim",
+  "description": "Offline-first Bluetooth mesh messenger for private, encrypted peer-to-peer communications with zero internet.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

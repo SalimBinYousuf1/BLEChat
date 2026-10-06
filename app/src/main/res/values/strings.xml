@@ -1,0 +1,131 @@
+<resources>
+    <string name="app_name">Salim</string>
+    <string name="app_tagline">Offline Mesh Messenger</string>
+    <string name="tagline_subtitle">Zero internet. Zero accounts. Fully encrypted.</string>
+
+    <!-- Navigation Tabs -->
+    <string name="tab_chats">Chats</string>
+    <string name="tab_nearby">Nearby</string>
+    <string name="tab_channels">Channels</string>
+    <string name="tab_settings">Settings</string>
+
+    <!-- Mesh Status -->
+    <string name="mesh_active">Mesh Active</string>
+    <string name="mesh_scanning">Searching for peers…</string>
+    <string name="mesh_connected">%1$d peers connected</string>
+    <string name="mesh_peer_single">1 peer connected</string>
+    <string name="mesh_no_peers">No peers nearby</string>
+    <string name="mesh_waiting_nearby">Waiting for someone nearby</string>
+    <string name="mesh_hops">%1$d hops away</string>
+    <string name="mesh_direct">Direct link</string>
+    <string name="signal_close">Close (&lt;5m)</string>
+    <string name="signal_near">Near (&lt;15m)</string>
+    <string name="signal_far">Far (&gt;15m)</string>
+
+    <!-- Channels & Chats -->
+    <string name="channel_public_title">Public Nearby Channel</string>
+    <string name="channel_public_banner">Public broadcast. Anyone in the Bluetooth mesh can read these messages.</string>
+    <string name="channel_public_desc">Broadcast to all devices in the local mesh network.</string>
+    <string name="groups_title">Group Chats</string>
+    <string name="create_group">Create Group</string>
+    <string name="group_name_hint">Group name</string>
+    <string name="new_chat">New Chat</string>
+    <string name="search_chats">Search chats or peers…</string>
+    <string name="no_chats_yet">No conversations yet</string>
+    <string name="no_chats_desc">Discover nearby people or open the Public Channel to say hello.</string>
+    <string name="type_message_hint">Type a message…</string>
+    <string name="recording_audio">Recording voice note…</string>
+    <string name="slide_to_cancel">Slide to cancel</string>
+    <string name="voice_note">Voice note</string>
+    <string name="photo_message">Photo</string>
+    <string name="sos_broadcast_title">EMERGENCY SOS</string>
+    <string name="sos_banner">EMERGENCY SOS BROADCAST</string>
+    <string name="sos_button">Send SOS Alert</string>
+    <string name="sos_confirmation_title">Confirm Emergency Broadcast</string>
+    <string name="sos_confirmation_desc">This will broadcast your emergency alert with highest priority to all connected mesh nodes within range.</string>
+    <string name="sos_cancel">Cancel</string>
+    <string name="sos_confirm_send">Broadcast SOS Now</string>
+    <string name="sos_sent_success">SOS alert broadcasted to %1$d peers</string>
+
+    <!-- Message Actions & Status -->
+    <string name="status_sending">Sending…</string>
+    <string name="status_sent_mesh">Sent to mesh</string>
+    <string name="status_delivered">Delivered</string>
+    <string name="status_read">Read</string>
+    <string name="status_failed">Delivery failed</string>
+    <string name="action_reply">Reply</string>
+    <string name="action_copy">Copy text</string>
+    <string name="action_delete">Delete for me</string>
+    <string name="action_verify">Verify Contact</string>
+    <string name="action_block">Block Peer</string>
+    <string name="action_unblock">Unblock Peer</string>
+    <string name="action_clear_chat">Clear Chat History</string>
+
+    <!-- Contact & Verification -->
+    <string name="safety_number_title">Safety Number</string>
+    <string name="safety_number_desc">Compare this 32-digit safety number or scan the QR code to verify end-to-end encryption integrity.</string>
+    <string name="verified_contact">Verified Contact</string>
+    <string name="unverified_contact">Unverified Contact</string>
+    <string name="mark_verified">Mark as Verified</string>
+    <string name="qr_my_code">My Mesh QR Code</string>
+    <string name="qr_scan">Scan Peer QR</string>
+    <string name="qr_instruction">Point camera at another Salim user’s QR code to verify them.</string>
+
+    <!-- Onboarding & Setup -->
+    <string name="onboarding_title_1">Off-Grid Messaging</string>
+    <string name="onboarding_desc_1">Communicate without cellular data, internet access, or phone towers through peer-to-peer Bluetooth mesh.</string>
+    <string name="onboarding_title_2">No Accounts, Ever</string>
+    <string name="onboarding_desc_2">No phone number. No email. No servers. Your identity is a local cryptographic key stored securely on your device.</string>
+    <string name="onboarding_title_3">End-to-End Encrypted</string>
+    <string name="onboarding_desc_3">Private 1-on-1 and group chats use modern forward-secret encryption. Only intended recipients can decrypt them.</string>
+    <string name="get_started">Get Started</string>
+    <string name="setup_profile_title">Choose your Nickname</string>
+    <string name="setup_profile_desc">This nickname will be seen by nearby people in the mesh alongside your cryptographic fingerprint.</string>
+    <string name="nickname_hint">e.g. Phoenix, Traveler, Sam</string>
+    <string name="continue_action">Continue</string>
+
+    <!-- Permissions -->
+    <string name="permissions_title">Mesh Permissions</string>
+    <string name="permissions_desc">Salim needs Bluetooth and notification permissions to discover and exchange mesh packets with nearby devices.</string>
+    <string name="permission_bluetooth">Nearby Bluetooth Devices</string>
+    <string name="permission_bluetooth_desc">Required to advertise, discover, and transmit encrypted packets between devices.</string>
+    <string name="permission_notifications">Notifications</string>
+    <string name="permission_notifications_desc">Required to notify you of incoming messages and maintain the background mesh service.</string>
+    <string name="permission_camera">Camera (Optional)</string>
+    <string name="permission_camera_desc">Used only for scanning contact verification QR codes.</string>
+    <string name="permission_audio">Microphone (Optional)</string>
+    <string name="permission_audio_desc">Used only when you choose to record voice notes.</string>
+    <string name="grant_permissions">Enable Mesh</string>
+    <string name="open_settings">Open Device Settings</string>
+
+    <!-- Settings -->
+    <string name="settings_title">Settings</string>
+    <string name="profile_section">Identity</string>
+    <string name="privacy_section">Privacy &amp; Security</string>
+    <string name="mesh_section">Mesh &amp; Battery</string>
+    <string name="data_section">Storage &amp; Backup</string>
+    <string name="about_section">About &amp; Diagnostics</string>
+    <string name="battery_mode_title">Battery Profile</string>
+    <string name="battery_balanced">Balanced (Recommended)</string>
+    <string name="battery_performance">High Performance (Fast hops)</string>
+    <string name="battery_saver">Power Saver (Low scan duty)</string>
+    <string name="read_receipts_title">Send Read Receipts</string>
+    <string name="screenshot_protection_title">Block Screenshots (FLAG_SECURE)</string>
+    <string name="panic_wipe_title">Emergency Panic Wipe</string>
+    <string name="panic_wipe_desc">Immediately wipes all private keys, message history, media, and peer contacts from this device.</string>
+    <string name="panic_wipe_button">Wipe All Data Now</string>
+    <string name="panic_wipe_confirm">Confirm Panic Wipe</string>
+    <string name="backup_export">Export Encrypted Backup</string>
+    <string name="backup_import">Restore from Backup</string>
+    <string name="backup_passphrase_hint">Enter backup passphrase</string>
+    <string name="diagnostics_title">Mesh Diagnostics</string>
+    <string name="threat_model_title">Threat Model &amp; Security</string>
+    <string name="faq_title">Help &amp; Mesh FAQ</string>
+
+    <!-- Notification Strings -->
+    <string name="notif_channel_messages">Salim Messages</string>
+    <string name="notif_channel_mesh">Mesh Connection Status</string>
+    <string name="notif_channel_sos">Emergency SOS Alerts</string>
+    <string name="notif_service_title">Salim Mesh Active</string>
+    <string name="notif_service_desc">Connected to local Bluetooth mesh</string>
+</resources>
