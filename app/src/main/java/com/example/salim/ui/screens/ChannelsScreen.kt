@@ -179,7 +179,7 @@ fun ChannelsScreen(
             Spacer(modifier = Modifier.weight(1f))
             Button(
                 onClick = { showCreateGroupDialog = true },
-                shape = RoundedCornerShape(12.dp),
+                shape = RoundedCornerShape(20.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = SalimCyanPrimary)
             ) {
                 Icon(imageVector = Icons.Default.Add, contentDescription = null, modifier = Modifier.size(16.dp))

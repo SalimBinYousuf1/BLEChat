@@ -262,7 +262,7 @@ private fun PeerListItem(
 
             Button(
                 onClick = onMessageClick,
-                shape = RoundedCornerShape(12.dp),
+                shape = RoundedCornerShape(20.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = SalimCyanPrimary),
                 modifier = Modifier.testTag("message_peer_${peer.id}")
             ) {

@@ -73,6 +73,7 @@ import com.example.R
 import com.example.salim.core.crypto.CryptoManager
 import com.example.salim.core.crypto.IdentityKeys
 import com.example.salim.core.model.Peer
+import com.example.salim.ui.components.CupertinoSegmentedControl
 import com.example.salim.ui.components.QrCodeHelper
 import com.example.ui.theme.SalimCyanPrimary
 import com.example.ui.theme.SalimSuccessGreen
@@ -126,26 +127,12 @@ fun ContactVerifyScreen(
                 .padding(innerPadding)
                 .background(MaterialTheme.colorScheme.background)
         ) {
-            TabRow(selectedTabIndex = selectedTab) {
-                Tab(
-                    selected = selectedTab == 0,
-                    onClick = { selectedTab = 0 },
-                    text = { Text("My QR") },
-                    icon = { Icon(imageVector = Icons.Default.QrCode, contentDescription = null) }
-                )
-                Tab(
-                    selected = selectedTab == 1,
-                    onClick = { selectedTab = 1 },
-                    text = { Text("Scan QR") },
-                    icon = { Icon(imageVector = Icons.Default.QrCodeScanner, contentDescription = null) }
-                )
-                Tab(
-                    selected = selectedTab == 2,
-                    onClick = { selectedTab = 2 },
-                    text = { Text("Safety No.") },
-                    icon = { Icon(imageVector = Icons.Default.Shield, contentDescription = null) }
-                )
-            }
+            CupertinoSegmentedControl(
+                items = listOf("My QR", "Scan QR", "Safety No."),
+                selectedIndex = selectedTab,
+                onItemSelected = { selectedTab = it },
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+            )
 
             when (selectedTab) {
                 0 -> {

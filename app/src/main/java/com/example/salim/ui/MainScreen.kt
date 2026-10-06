@@ -2,6 +2,7 @@ package com.example.salim.ui
 
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -10,13 +11,7 @@ import androidx.compose.material.icons.filled.Campaign
 import androidx.compose.material.icons.filled.Chat
 import androidx.compose.material.icons.filled.Radar
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -24,12 +19,16 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import com.example.R
 import com.example.salim.core.model.Conversation
 import com.example.salim.core.model.Peer
+import com.example.salim.ui.components.AppleFloatingPillNavBar
+import com.example.salim.ui.components.FloatingNavItem
 import com.example.salim.ui.components.SosConfirmDialog
 import com.example.salim.ui.screens.ChannelsScreen
 import com.example.salim.ui.screens.ChatDetailScreen
@@ -38,7 +37,6 @@ import com.example.salim.ui.screens.ContactVerifyScreen
 import com.example.salim.ui.screens.NearbyRadarScreen
 import com.example.salim.ui.screens.OnboardingScreen
 import com.example.salim.ui.screens.SettingsScreen
-import com.example.ui.theme.SalimCyanPrimary
 
 @Composable
 fun MainScreen(viewModel: SalimViewModel) {
@@ -113,102 +111,72 @@ fun MainScreen(viewModel: SalimViewModel) {
         return
     }
 
-    // Main 4-Tab Screen
-    Scaffold(
-        bottomBar = {
-            NavigationBar(
-                containerColor = MaterialTheme.colorScheme.surface
-            ) {
-                NavigationBarItem(
-                    selected = selectedTab == 0,
-                    onClick = { selectedTab = 0 },
-                    icon = { Icon(Icons.Default.Chat, contentDescription = "Chats") },
-                    label = { Text(stringResource(R.string.tab_chats)) },
-                    colors = NavigationBarItemDefaults.colors(
-                        selectedIconColor = SalimCyanPrimary,
-                        indicatorColor = SalimCyanPrimary.copy(alpha = 0.15f)
-                    )
-                )
-                NavigationBarItem(
-                    selected = selectedTab == 1,
-                    onClick = { selectedTab = 1 },
-                    icon = { Icon(Icons.Default.Radar, contentDescription = "Nearby") },
-                    label = { Text(stringResource(R.string.tab_nearby)) },
-                    colors = NavigationBarItemDefaults.colors(
-                        selectedIconColor = SalimCyanPrimary,
-                        indicatorColor = SalimCyanPrimary.copy(alpha = 0.15f)
-                    )
-                )
-                NavigationBarItem(
-                    selected = selectedTab == 2,
-                    onClick = { selectedTab = 2 },
-                    icon = { Icon(Icons.Default.Campaign, contentDescription = "Channels") },
-                    label = { Text(stringResource(R.string.tab_channels)) },
-                    colors = NavigationBarItemDefaults.colors(
-                        selectedIconColor = SalimCyanPrimary,
-                        indicatorColor = SalimCyanPrimary.copy(alpha = 0.15f)
-                    )
-                )
-                NavigationBarItem(
-                    selected = selectedTab == 3,
-                    onClick = { selectedTab = 3 },
-                    icon = { Icon(Icons.Default.Settings, contentDescription = "Settings") },
-                    label = { Text(stringResource(R.string.tab_settings)) },
-                    colors = NavigationBarItemDefaults.colors(
-                        selectedIconColor = SalimCyanPrimary,
-                        indicatorColor = SalimCyanPrimary.copy(alpha = 0.15f)
-                    )
-                )
-            }
-        }
-    ) { innerPadding ->
+    val navItems = listOf(
+        FloatingNavItem(stringResource(R.string.tab_chats), Icons.Default.Chat),
+        FloatingNavItem(stringResource(R.string.tab_nearby), Icons.Default.Radar),
+        FloatingNavItem(stringResource(R.string.tab_channels), Icons.Default.Campaign),
+        FloatingNavItem(stringResource(R.string.tab_settings), Icons.Default.Settings)
+    )
+
+    // Main Screen with Floating Pill Bottom Bar
+    Box(modifier = Modifier.fillMaxSize()) {
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(innerPadding)
+                .padding(bottom = 76.dp)
         ) {
-            when (selectedTab) {
-                0 -> ChatsListScreen(
-                    conversations = conversations,
-                    activePeers = activePeers,
-                    onConversationClick = { convId -> viewModel.openConversation(convId) },
-                    onNewChatClick = { selectedTab = 1 },
-                    onPanicWipe = {
-                        viewModel.panicWipe {
-                            Toast.makeText(context, "All keys and messages erased", Toast.LENGTH_LONG).show()
+            Crossfade(targetState = selectedTab, label = "tab_crossfade") { tab ->
+                when (tab) {
+                    0 -> ChatsListScreen(
+                        conversations = conversations,
+                        activePeers = activePeers,
+                        onConversationClick = { convId -> viewModel.openConversation(convId) },
+                        onNewChatClick = { selectedTab = 1 },
+                        onPanicWipe = {
+                            viewModel.panicWipe {
+                                Toast.makeText(context, "All keys and messages erased", Toast.LENGTH_LONG).show()
+                            }
                         }
-                    }
-                )
-                1 -> NearbyRadarScreen(
-                    peers = activePeers,
-                    onMessagePeer = { peer -> viewModel.openDirectChatWithPeer(peer) }
-                )
-                2 -> ChannelsScreen(
-                    conversations = conversations,
-                    onOpenPublicChannel = { viewModel.openConversation(Conversation.PUBLIC_CHANNEL_ID) },
-                    onOpenConversation = { convId -> viewModel.openConversation(convId) },
-                    onCreateGroup = { name -> viewModel.createGroup(name) },
-                    onTriggerSos = { showSosDialog = true }
-                )
-                3 -> SettingsScreen(
-                    identity = identity,
-                    activePeers = activePeers,
-                    batteryMode = batteryMode,
-                    readReceipts = readReceipts,
-                    flagSecure = flagSecure,
-                    onSetBatteryMode = { mode -> viewModel.setBatteryMode(mode) },
-                    onToggleReadReceipts = { enabled -> viewModel.toggleReadReceipts(enabled) },
-                    onToggleFlagSecure = { enabled -> viewModel.toggleFlagSecure(enabled) },
-                    onExportBackup = { pass -> viewModel.exportEncryptedBackup(pass) },
-                    onImportBackup = { data, pass -> viewModel.importEncryptedBackup(data, pass) },
-                    onPanicWipe = {
-                        viewModel.panicWipe {
-                            Toast.makeText(context, "All keys and messages erased", Toast.LENGTH_LONG).show()
+                    )
+                    1 -> NearbyRadarScreen(
+                        peers = activePeers,
+                        onMessagePeer = { peer -> viewModel.openDirectChatWithPeer(peer) }
+                    )
+                    2 -> ChannelsScreen(
+                        conversations = conversations,
+                        onOpenPublicChannel = { viewModel.openConversation(Conversation.PUBLIC_CHANNEL_ID) },
+                        onOpenConversation = { convId -> viewModel.openConversation(convId) },
+                        onCreateGroup = { name -> viewModel.createGroup(name) },
+                        onTriggerSos = { showSosDialog = true }
+                    )
+                    3 -> SettingsScreen(
+                        identity = identity,
+                        activePeers = activePeers,
+                        batteryMode = batteryMode,
+                        readReceipts = readReceipts,
+                        flagSecure = flagSecure,
+                        onSetBatteryMode = { mode -> viewModel.setBatteryMode(mode) },
+                        onToggleReadReceipts = { enabled -> viewModel.toggleReadReceipts(enabled) },
+                        onToggleFlagSecure = { enabled -> viewModel.toggleFlagSecure(enabled) },
+                        onExportBackup = { pass -> viewModel.exportEncryptedBackup(pass) },
+                        onImportBackup = { data, pass -> viewModel.importEncryptedBackup(data, pass) },
+                        onPanicWipe = {
+                            viewModel.panicWipe {
+                                Toast.makeText(context, "All keys and messages erased", Toast.LENGTH_LONG).show()
+                            }
                         }
-                    }
-                )
+                    )
+                }
             }
         }
+
+        // Apple-style Floating Pill Navigation Bar
+        AppleFloatingPillNavBar(
+            items = navItems,
+            selectedIndex = selectedTab,
+            onItemSelected = { selectedTab = it },
+            modifier = Modifier.align(Alignment.BottomCenter)
+        )
     }
 
     if (showSosDialog) {

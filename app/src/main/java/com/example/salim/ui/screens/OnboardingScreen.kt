@@ -177,7 +177,7 @@ fun OnboardingScreen(
                         .fillMaxWidth()
                         .height(52.dp)
                         .testTag("onboarding_continue_button"),
-                    shape = RoundedCornerShape(16.dp),
+                    shape = RoundedCornerShape(26.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = SalimCyanPrimary)
                 ) {
                     Text(
@@ -337,7 +337,7 @@ private fun PermissionsExplanationStep(
                     .fillMaxWidth()
                     .height(50.dp)
                     .testTag("grant_permissions_button"),
-                shape = RoundedCornerShape(14.dp),
+                shape = RoundedCornerShape(26.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = SalimCyanPrimary)
             ) {
                 Text(

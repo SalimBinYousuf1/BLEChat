@@ -19,6 +19,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
 import androidx.compose.material.icons.filled.BatteryChargingFull
 import androidx.compose.material.icons.filled.DeleteForever
 import androidx.compose.material.icons.filled.FileDownload
@@ -38,6 +39,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -48,6 +50,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
@@ -61,6 +65,7 @@ import com.example.R
 import com.example.salim.core.crypto.IdentityKeys
 import com.example.salim.core.model.BatteryMode
 import com.example.salim.core.model.Peer
+import com.example.salim.ui.components.CupertinoSegmentedControl
 import com.example.ui.theme.SalimCyanPrimary
 import com.example.ui.theme.SalimEmergencyRed
 
@@ -96,20 +101,20 @@ fun SettingsScreen(
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
-            .padding(16.dp)
+            .padding(horizontal = 16.dp, vertical = 8.dp)
     ) {
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(12.dp))
 
         Text(
             text = stringResource(R.string.settings_title),
-            fontSize = 28.sp,
+            fontSize = 32.sp,
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.onBackground
         )
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // 1. Identity Card
+        // 1. Apple-style Profile Inset Card
         Card(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(20.dp),
@@ -117,21 +122,22 @@ fun SettingsScreen(
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.padding(18.dp)
+                modifier = Modifier.padding(16.dp)
             ) {
                 Box(
                     modifier = Modifier
-                        .size(54.dp)
-                        .background(SalimCyanPrimary.copy(alpha = 0.2f), CircleShape),
+                        .size(56.dp)
+                        .clip(CircleShape)
+                        .background(SalimCyanPrimary.copy(alpha = 0.15f)),
                     contentAlignment = Alignment.Center
                 ) {
-                    Icon(imageVector = Icons.Default.Person, contentDescription = null, tint = SalimCyanPrimary)
+                    Icon(imageVector = Icons.Default.Person, contentDescription = null, tint = SalimCyanPrimary, modifier = Modifier.size(30.dp))
                 }
                 Spacer(modifier = Modifier.width(16.dp))
-                Column {
+                Column(modifier = Modifier.weight(1f)) {
                     Text(
                         text = identity?.nickname ?: "Salim User",
-                        fontSize = 18.sp,
+                        fontSize = 19.sp,
                         fontWeight = FontWeight.Bold
                     )
                     Spacer(modifier = Modifier.height(2.dp))
@@ -144,169 +150,139 @@ fun SettingsScreen(
             }
         }
 
-        Spacer(modifier = Modifier.height(20.dp))
+        Spacer(modifier = Modifier.height(22.dp))
 
-        // 2. Battery & Mesh Profile
-        Text(
-            text = stringResource(R.string.mesh_section),
-            fontWeight = FontWeight.Bold,
-            fontSize = 15.sp,
-            color = MaterialTheme.colorScheme.primary
-        )
+        // 2. Battery & Mesh Profile (Cupertino Segmented Control Pill)
+        SectionHeader(text = stringResource(R.string.mesh_section))
         Spacer(modifier = Modifier.height(8.dp))
         Card(
             modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(16.dp),
+            shape = RoundedCornerShape(18.dp),
             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
         ) {
-            Column(modifier = Modifier.padding(16.dp)) {
-                BatteryOptionRow(
-                    title = stringResource(R.string.battery_balanced),
-                    selected = batteryMode == BatteryMode.BALANCED,
-                    onClick = { onSetBatteryMode(BatteryMode.BALANCED) }
+            Column(modifier = Modifier.padding(14.dp)) {
+                Text(
+                    text = "Duty Cycle Mode",
+                    fontWeight = FontWeight.SemiBold,
+                    fontSize = 14.sp
                 )
-                HorizontalDivider(modifier = Modifier.padding(vertical = 10.dp))
-                BatteryOptionRow(
-                    title = stringResource(R.string.battery_performance),
-                    selected = batteryMode == BatteryMode.PERFORMANCE,
-                    onClick = { onSetBatteryMode(BatteryMode.PERFORMANCE) }
-                )
-                HorizontalDivider(modifier = Modifier.padding(vertical = 10.dp))
-                BatteryOptionRow(
-                    title = stringResource(R.string.battery_saver),
-                    selected = batteryMode == BatteryMode.SAVER,
-                    onClick = { onSetBatteryMode(BatteryMode.SAVER) }
+                Spacer(modifier = Modifier.height(10.dp))
+                val batteryOptions = listOf("Balanced", "Performance", "Saver")
+                val selectedIdx = when (batteryMode) {
+                    BatteryMode.BALANCED -> 0
+                    BatteryMode.PERFORMANCE -> 1
+                    BatteryMode.SAVER -> 2
+                }
+                CupertinoSegmentedControl(
+                    items = batteryOptions,
+                    selectedIndex = selectedIdx,
+                    onItemSelected = { idx ->
+                        val mode = when (idx) {
+                            0 -> BatteryMode.BALANCED
+                            1 -> BatteryMode.PERFORMANCE
+                            else -> BatteryMode.SAVER
+                        }
+                        onSetBatteryMode(mode)
+                    }
                 )
             }
         }
 
-        Spacer(modifier = Modifier.height(20.dp))
+        Spacer(modifier = Modifier.height(22.dp))
 
-        // 3. Privacy & Security
-        Text(
-            text = stringResource(R.string.privacy_section),
-            fontWeight = FontWeight.Bold,
-            fontSize = 15.sp,
-            color = MaterialTheme.colorScheme.primary
-        )
+        // 3. Privacy & Security Inset Group
+        SectionHeader(text = stringResource(R.string.privacy_section))
         Spacer(modifier = Modifier.height(8.dp))
         Card(
             modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(16.dp),
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
-        ) {
-            Column(modifier = Modifier.padding(16.dp)) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(text = stringResource(R.string.read_receipts_title), fontWeight = FontWeight.SemiBold)
-                        Text(
-                            text = "Show double checkmarks when messages are read",
-                            fontSize = 12.sp,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                    Switch(
-                        checked = readReceipts,
-                        onCheckedChange = onToggleReadReceipts,
-                        modifier = Modifier.testTag("read_receipts_switch")
-                    )
-                }
-
-                HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp))
-
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(text = stringResource(R.string.screenshot_protection_title), fontWeight = FontWeight.SemiBold)
-                        Text(
-                            text = "Prevents screenshots and app previews in recents screen",
-                            fontSize = 12.sp,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                    Switch(
-                        checked = flagSecure,
-                        onCheckedChange = onToggleFlagSecure,
-                        modifier = Modifier.testTag("flag_secure_switch")
-                    )
-                }
-            }
-        }
-
-        Spacer(modifier = Modifier.height(20.dp))
-
-        // 4. Storage & Encrypted Backup
-        Text(
-            text = "Storage & Backup",
-            fontWeight = FontWeight.Bold,
-            fontSize = 15.sp,
-            color = MaterialTheme.colorScheme.primary
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(16.dp),
+            shape = RoundedCornerShape(18.dp),
             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
         ) {
             Column(modifier = Modifier.padding(vertical = 4.dp)) {
-                SettingsClickableRow(
+                AppleSwitchRow(
+                    icon = Icons.Default.Security,
+                    iconBgColor = Color(0xFF34C759),
+                    title = stringResource(R.string.read_receipts_title),
+                    subtitle = "Show double checkmarks when messages are read",
+                    checked = readReceipts,
+                    onCheckedChange = onToggleReadReceipts
+                )
+                HorizontalDivider(modifier = Modifier.padding(start = 56.dp, end = 16.dp))
+                AppleSwitchRow(
+                    icon = Icons.Default.Shield,
+                    iconBgColor = Color(0xFF007AFF),
+                    title = stringResource(R.string.screenshot_protection_title),
+                    subtitle = "Prevents screenshots and app previews in recents",
+                    checked = flagSecure,
+                    onCheckedChange = onToggleFlagSecure
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(22.dp))
+
+        // 4. Storage & Encrypted Backup Inset Group
+        SectionHeader(text = "STORAGE & BACKUP")
+        Spacer(modifier = Modifier.height(8.dp))
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(18.dp),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+        ) {
+            Column(modifier = Modifier.padding(vertical = 4.dp)) {
+                AppleNavigationRow(
                     icon = Icons.Default.FileDownload,
+                    iconBgColor = Color(0xFF5856D6),
                     title = "Export Encrypted Backup",
                     onClick = { showExportBackupDialog = true }
                 )
-                HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
-                SettingsClickableRow(
+                HorizontalDivider(modifier = Modifier.padding(start = 56.dp, end = 16.dp))
+                AppleNavigationRow(
                     icon = Icons.Default.FileUpload,
+                    iconBgColor = Color(0xFFFF9500),
                     title = "Restore from Encrypted Backup",
                     onClick = { showImportBackupDialog = true }
                 )
             }
         }
 
-        Spacer(modifier = Modifier.height(20.dp))
+        Spacer(modifier = Modifier.height(22.dp))
 
         // 5. Help, Threat Model & Diagnostics
-        Text(
-            text = stringResource(R.string.about_section),
-            fontWeight = FontWeight.Bold,
-            fontSize = 15.sp,
-            color = MaterialTheme.colorScheme.primary
-        )
+        SectionHeader(text = stringResource(R.string.about_section))
         Spacer(modifier = Modifier.height(8.dp))
         Card(
             modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(16.dp),
+            shape = RoundedCornerShape(18.dp),
             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
         ) {
             Column(modifier = Modifier.padding(vertical = 4.dp)) {
-                SettingsClickableRow(
+                AppleNavigationRow(
                     icon = Icons.Default.Shield,
+                    iconBgColor = Color(0xFF30B0C7),
                     title = stringResource(R.string.threat_model_title),
                     onClick = { showThreatModelDialog = true }
                 )
-                HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
-                SettingsClickableRow(
+                HorizontalDivider(modifier = Modifier.padding(start = 56.dp, end = 16.dp))
+                AppleNavigationRow(
                     icon = Icons.Default.HelpOutline,
+                    iconBgColor = Color(0xFFAF52DE),
                     title = stringResource(R.string.faq_title),
                     onClick = { showFaqDialog = true }
                 )
-                HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
-                SettingsClickableRow(
+                HorizontalDivider(modifier = Modifier.padding(start = 56.dp, end = 16.dp))
+                AppleNavigationRow(
                     icon = Icons.Default.Security,
+                    iconBgColor = Color(0xFF8E8E93),
                     title = stringResource(R.string.diagnostics_title),
                     onClick = { showDiagnosticsDialog = true }
                 )
             }
         }
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(28.dp))
 
-        // 6. Emergency Panic Wipe Actions
+        // 6. Emergency Panic Wipe Pill Buttons
         Button(
             onClick = { showPanicWipeConfirm = true },
             modifier = Modifier
@@ -314,7 +290,7 @@ fun SettingsScreen(
                 .height(52.dp)
                 .testTag("panic_wipe_button"),
             colors = ButtonDefaults.buttonColors(containerColor = SalimEmergencyRed),
-            shape = RoundedCornerShape(16.dp)
+            shape = RoundedCornerShape(26.dp)
         ) {
             Icon(imageVector = Icons.Default.DeleteForever, contentDescription = null)
             Spacer(modifier = Modifier.width(8.dp))
@@ -327,10 +303,12 @@ fun SettingsScreen(
 
         Spacer(modifier = Modifier.height(10.dp))
 
-        // Confirm-less Panic Wipe Shortcut
+        // Confirm-less Instant Panic Wipe Shortcut Pill
         TextButton(
             onClick = onPanicWipe,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(20.dp))
         ) {
             Icon(imageVector = Icons.Default.FlashOn, contentDescription = null, tint = SalimEmergencyRed, modifier = Modifier.size(16.dp))
             Spacer(modifier = Modifier.width(6.dp))
@@ -348,7 +326,7 @@ fun SettingsScreen(
         Text(
             text = "Salim v1.0.0 (Offline Bluetooth Mesh)",
             fontSize = 12.sp,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
             modifier = Modifier
                 .align(Alignment.CenterHorizontally)
                 .clickable {
@@ -360,7 +338,7 @@ fun SettingsScreen(
                 }
                 .padding(8.dp)
         )
-        Spacer(modifier = Modifier.height(40.dp))
+        Spacer(modifier = Modifier.height(80.dp))
     }
 
     // Export Backup Dialog
@@ -371,7 +349,7 @@ fun SettingsScreen(
                 exportedBackupString = null
                 backupPassphraseInput = ""
             },
-            title = { Text("Export Encrypted Backup") },
+            title = { Text("Export Encrypted Backup", fontWeight = FontWeight.Bold) },
             text = {
                 Column {
                     if (exportedBackupString == null) {
@@ -385,6 +363,7 @@ fun SettingsScreen(
                             onValueChange = { backupPassphraseInput = it },
                             placeholder = { Text("Enter passphrase") },
                             singleLine = true,
+                            shape = RoundedCornerShape(12.dp),
                             modifier = Modifier.fillMaxWidth()
                         )
                     } else {
@@ -398,6 +377,7 @@ fun SettingsScreen(
                             onValueChange = {},
                             readOnly = true,
                             maxLines = 4,
+                            shape = RoundedCornerShape(12.dp),
                             modifier = Modifier.fillMaxWidth()
                         )
                     }
@@ -406,6 +386,7 @@ fun SettingsScreen(
             confirmButton = {
                 if (exportedBackupString == null) {
                     Button(
+                        shape = RoundedCornerShape(12.dp),
                         onClick = {
                             val pass = backupPassphraseInput.trim()
                             if (pass.isNotEmpty()) {
@@ -417,6 +398,7 @@ fun SettingsScreen(
                     }
                 } else {
                     Button(
+                        shape = RoundedCornerShape(12.dp),
                         onClick = {
                             clipboardManager.setText(AnnotatedString(exportedBackupString!!))
                             Toast.makeText(context, "Backup copied to clipboard", Toast.LENGTH_SHORT).show()
@@ -449,7 +431,7 @@ fun SettingsScreen(
                 backupPassphraseInput = ""
                 backupPayloadInput = ""
             },
-            title = { Text("Restore from Backup") },
+            title = { Text("Restore from Backup", fontWeight = FontWeight.Bold) },
             text = {
                 Column {
                     Text(
@@ -462,6 +444,7 @@ fun SettingsScreen(
                         onValueChange = { backupPayloadInput = it },
                         placeholder = { Text("Paste backup data") },
                         maxLines = 3,
+                        shape = RoundedCornerShape(12.dp),
                         modifier = Modifier.fillMaxWidth()
                     )
                     Spacer(modifier = Modifier.height(8.dp))
@@ -470,12 +453,14 @@ fun SettingsScreen(
                         onValueChange = { backupPassphraseInput = it },
                         placeholder = { Text("Enter passphrase") },
                         singleLine = true,
+                        shape = RoundedCornerShape(12.dp),
                         modifier = Modifier.fillMaxWidth()
                     )
                 }
             },
             confirmButton = {
                 Button(
+                    shape = RoundedCornerShape(12.dp),
                     onClick = {
                         val payload = backupPayloadInput.trim()
                         val pass = backupPassphraseInput.trim()
@@ -511,10 +496,11 @@ fun SettingsScreen(
     if (showPanicWipeConfirm) {
         AlertDialog(
             onDismissRequest = { showPanicWipeConfirm = false },
-            title = { Text(stringResource(R.string.panic_wipe_confirm)) },
+            title = { Text(stringResource(R.string.panic_wipe_confirm), fontWeight = FontWeight.Bold) },
             text = { Text(stringResource(R.string.panic_wipe_desc)) },
             confirmButton = {
                 Button(
+                    shape = RoundedCornerShape(12.dp),
                     onClick = {
                         showPanicWipeConfirm = false
                         onPanicWipe()
@@ -536,7 +522,7 @@ fun SettingsScreen(
     if (showThreatModelDialog) {
         AlertDialog(
             onDismissRequest = { showThreatModelDialog = false },
-            title = { Text(stringResource(R.string.threat_model_title)) },
+            title = { Text(stringResource(R.string.threat_model_title), fontWeight = FontWeight.Bold) },
             text = {
                 Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
                     Text(
@@ -547,7 +533,7 @@ fun SettingsScreen(
                 }
             },
             confirmButton = {
-                Button(onClick = { showThreatModelDialog = false }) { Text("Close") }
+                Button(shape = RoundedCornerShape(12.dp), onClick = { showThreatModelDialog = false }) { Text("Close") }
             }
         )
     }
@@ -556,7 +542,7 @@ fun SettingsScreen(
     if (showFaqDialog) {
         AlertDialog(
             onDismissRequest = { showFaqDialog = false },
-            title = { Text(stringResource(R.string.faq_title)) },
+            title = { Text(stringResource(R.string.faq_title), fontWeight = FontWeight.Bold) },
             text = {
                 Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
                     Text(
@@ -567,7 +553,7 @@ fun SettingsScreen(
                 }
             },
             confirmButton = {
-                Button(onClick = { showFaqDialog = false }) { Text("Close") }
+                Button(shape = RoundedCornerShape(12.dp), onClick = { showFaqDialog = false }) { Text("Close") }
             }
         )
     }
@@ -576,7 +562,7 @@ fun SettingsScreen(
     if (showDiagnosticsDialog) {
         AlertDialog(
             onDismissRequest = { showDiagnosticsDialog = false },
-            title = { Text(stringResource(R.string.diagnostics_title)) },
+            title = { Text(stringResource(R.string.diagnostics_title), fontWeight = FontWeight.Bold) },
             text = {
                 Column {
                     Text("Mesh Peers in Range: ${activePeers.size}")
@@ -587,45 +573,69 @@ fun SettingsScreen(
                 }
             },
             confirmButton = {
-                Button(onClick = { showDiagnosticsDialog = false }) { Text("Done") }
+                Button(shape = RoundedCornerShape(12.dp), onClick = { showDiagnosticsDialog = false }) { Text("Done") }
             }
         )
     }
 }
 
 @Composable
-private fun BatteryOptionRow(
+private fun SectionHeader(text: String) {
+    Text(
+        text = text.uppercase(),
+        fontWeight = FontWeight.SemiBold,
+        fontSize = 12.sp,
+        letterSpacing = 1.sp,
+        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f),
+        modifier = Modifier.padding(start = 8.dp)
+    )
+}
+
+@Composable
+private fun AppleSwitchRow(
+    icon: ImageVector,
+    iconBgColor: Color,
     title: String,
-    selected: Boolean,
-    onClick: () -> Unit
+    subtitle: String,
+    checked: Boolean,
+    onCheckedChange: (Boolean) -> Unit
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { onClick() }
-            .padding(vertical = 4.dp)
+            .padding(horizontal = 14.dp, vertical = 10.dp)
     ) {
-        Text(
-            text = title,
-            fontSize = 14.sp,
-            fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
-            color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
-            modifier = Modifier.weight(1f)
-        )
-        if (selected) {
-            Icon(
-                imageVector = Icons.Default.BatteryChargingFull,
-                contentDescription = "Selected",
-                tint = MaterialTheme.colorScheme.primary
+        Box(
+            modifier = Modifier
+                .size(32.dp)
+                .clip(RoundedCornerShape(8.dp))
+                .background(iconBgColor),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(imageVector = icon, contentDescription = null, tint = Color.White, modifier = Modifier.size(18.dp))
+        }
+        Spacer(modifier = Modifier.width(14.dp))
+        Column(modifier = Modifier.weight(1f)) {
+            Text(text = title, fontWeight = FontWeight.SemiBold, fontSize = 15.sp)
+            Text(
+                text = subtitle,
+                fontSize = 12.sp,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
+        Switch(
+            checked = checked,
+            onCheckedChange = onCheckedChange,
+            colors = SwitchDefaults.colors(checkedThumbColor = Color.White, checkedTrackColor = SalimCyanPrimary)
+        )
     }
 }
 
 @Composable
-private fun SettingsClickableRow(
+private fun AppleNavigationRow(
     icon: ImageVector,
+    iconBgColor: Color,
     title: String,
     onClick: () -> Unit
 ) {
@@ -634,10 +644,24 @@ private fun SettingsClickableRow(
         modifier = Modifier
             .fillMaxWidth()
             .clickable { onClick() }
-            .padding(horizontal = 16.dp, vertical = 14.dp)
+            .padding(horizontal = 14.dp, vertical = 12.dp)
     ) {
-        Icon(imageVector = icon, contentDescription = null, tint = SalimCyanPrimary)
+        Box(
+            modifier = Modifier
+                .size(32.dp)
+                .clip(RoundedCornerShape(8.dp))
+                .background(iconBgColor),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(imageVector = icon, contentDescription = null, tint = Color.White, modifier = Modifier.size(18.dp))
+        }
         Spacer(modifier = Modifier.width(14.dp))
-        Text(text = title, fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
+        Text(text = title, fontSize = 15.sp, fontWeight = FontWeight.SemiBold, modifier = Modifier.weight(1f))
+        Icon(
+            imageVector = Icons.AutoMirrored.Filled.ArrowForwardIos,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+            modifier = Modifier.size(14.dp)
+        )
     }
 }
