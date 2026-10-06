@@ -26,6 +26,8 @@ data class MessageEntity(
     val timestamp: Long = System.currentTimeMillis(),
     val status: String = DeliveryStatus.SENDING.name,
     val replyToId: String? = null,
+    val reaction: String? = null,
+    val isEdited: Boolean = false,
     val isOutgoing: Boolean = true
 ) {
     fun toChatMessage(): ChatMessage = ChatMessage(
@@ -40,6 +42,9 @@ data class MessageEntity(
         timestamp = timestamp,
         status = try { DeliveryStatus.valueOf(status) } catch (_: Exception) { DeliveryStatus.SENDING },
         replyToId = replyToId,
+        reaction = reaction,
+        reactions = if (reaction != null) mapOf(reaction to 1) else emptyMap(),
+        isEdited = isEdited,
         isOutgoing = isOutgoing
     )
 }

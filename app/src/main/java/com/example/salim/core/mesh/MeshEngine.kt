@@ -187,6 +187,24 @@ class MeshEngine(
             processedText = processedText.substring(endIdx + 2)
         }
 
+        // Handle in-place message edit packet
+        if (processedText.startsWith("[EDIT:") && processedText.contains("]:")) {
+            val endIdx = processedText.indexOf("]:")
+            val targetId = processedText.substring(6, endIdx)
+            val newContent = processedText.substring(endIdx + 2)
+            repository.editMessage(targetId, newContent)
+            return
+        }
+
+        // Handle emoji reaction packet
+        if (processedText.startsWith("[REACTION:") && processedText.contains("]:")) {
+            val endIdx = processedText.indexOf("]:")
+            val targetId = processedText.substring(10, endIdx)
+            val emoji = processedText.substring(endIdx + 2)
+            repository.reactToMessage(targetId, emoji)
+            return
+        }
+
         var mediaUri: String? = null
 
         // Parse Media Image or Media Audio
@@ -343,6 +361,42 @@ class MeshEngine(
         )
     }
 
+    suspend fun sendEditMessage(
+        conversationId: String,
+        recipientPeerId: String,
+        originalMsgId: String,
+        newContent: String
+    ) {
+        repository.editMessage(originalMsgId, newContent)
+        sendPayload(
+            conversationId = conversationId,
+            recipientPeerId = recipientPeerId,
+            wireText = "[EDIT:$originalMsgId]:$newContent",
+            displayText = newContent,
+            type = MessageType.TEXT,
+            mediaUri = null,
+            replyToId = null
+        )
+    }
+
+    suspend fun sendReactionMessage(
+        conversationId: String,
+        recipientPeerId: String,
+        targetMsgId: String,
+        emoji: String
+    ) {
+        repository.reactToMessage(targetMsgId, emoji)
+        sendPayload(
+            conversationId = conversationId,
+            recipientPeerId = recipientPeerId,
+            wireText = "[REACTION:$targetMsgId]:$emoji",
+            displayText = emoji,
+            type = MessageType.SYSTEM,
+            mediaUri = null,
+            replyToId = targetMsgId
+        )
+    }
+
     private suspend fun sendPayload(
         conversationId: String,
         recipientPeerId: String,
@@ -355,15 +409,33 @@ class MeshEngine(
         val msgIdBytes = SalimPacket.randomMessageId()
         val msgIdHex = msgIdBytes.joinToString("") { "%02X".format(it) }
 
-        val recipientBytes = recipientPeerId.chunked(2).map { it.toInt(16).toByte() }.toByteArray()
-        val peer = repository.getPeer(recipientPeerId)
+        val isBroadcast = recipientPeerId == "BROADCAST" || recipientPeerId.length != 16
+        val recipientBytes = if (isBroadcast) {
+            SalimPacket.BROADCAST_RECIPIENT
+        } else {
+            try {
+                recipientPeerId.chunked(2).map { it.toInt(16).toByte() }.toByteArray()
+            } catch (_: Exception) {
+                SalimPacket.BROADCAST_RECIPIENT
+            }
+        }
+        val peer = if (!isBroadcast) repository.getPeer(recipientPeerId) else null
 
-        val (payloadBytes, flags) = if (peer != null && peer.publicKeyX25519Hex.isNotEmpty()) {
-            val peerXPub = peer.publicKeyX25519Hex.chunked(2).map { it.toInt(16).toByte() }.toByteArray()
-            val sharedSecret = CryptoManager.calculateX25519SharedSecret(identity.x25519PrivateKey, peerXPub)
-            val sessionKey = CryptoManager.deriveSessionKey(sharedSecret)
-            val enc = CryptoManager.encryptChaCha20Poly1305(wireText.toByteArray(StandardCharsets.UTF_8), sessionKey)
-            Pair(enc, (PacketFlags.ENCRYPTED.toInt() or PacketFlags.NEEDS_ACK.toInt()).toByte())
+        val (payloadBytes, flags) = if (isBroadcast) {
+            Pair(wireText.toByteArray(StandardCharsets.UTF_8), PacketFlags.BROADCAST)
+        } else if (peer != null && peer.publicKeyX25519Hex.isNotEmpty()) {
+            val peerXPub = try {
+                peer.publicKeyX25519Hex.chunked(2).map { it.toInt(16).toByte() }.toByteArray()
+            } catch (_: Exception) { ByteArray(0) }
+
+            if (peerXPub.size == 32) {
+                val sharedSecret = CryptoManager.calculateX25519SharedSecret(identity.x25519PrivateKey, peerXPub)
+                val sessionKey = CryptoManager.deriveSessionKey(sharedSecret)
+                val enc = CryptoManager.encryptChaCha20Poly1305(wireText.toByteArray(StandardCharsets.UTF_8), sessionKey)
+                Pair(enc, (PacketFlags.ENCRYPTED.toInt() or PacketFlags.NEEDS_ACK.toInt()).toByte())
+            } else {
+                Pair(wireText.toByteArray(StandardCharsets.UTF_8), PacketFlags.NEEDS_ACK)
+            }
         } else {
             Pair(wireText.toByteArray(StandardCharsets.UTF_8), PacketFlags.NEEDS_ACK)
         }

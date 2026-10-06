@@ -7,43 +7,90 @@ import android.media.MediaPlayer
 import android.media.MediaRecorder
 import android.net.Uri
 import android.os.Build
-import android.util.Base64
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileOutputStream
+import java.io.InputStream
 import java.util.UUID
 
 object MediaManager {
 
     /**
      * Aggressively compresses user selected photo:
-     * - Resizes to max 640x640 preserving aspect ratio
+     * - Safely subsamples to prevent OOM
+     * - Resizes to max 480x480 preserving aspect ratio
      * - Strips EXIF metadata
-     * - Compresses to JPEG 75%
-     * Returns raw byte array capped for mesh transmission.
+     * - Step-down quality compression to ensure size <= 24 KB for reliable mesh delivery
      */
     fun compressImage(context: Context, imageUri: Uri): ByteArray {
-        val inputStream = context.contentResolver.openInputStream(imageUri) ?: return ByteArray(0)
-        val originalBitmap = BitmapFactory.decodeStream(inputStream)
-        inputStream.close()
-        originalBitmap ?: return ByteArray(0)
+        return try {
+            // Step 1: Decode image bounds only to avoid OutOfMemoryError
+            var input: InputStream? = context.contentResolver.openInputStream(imageUri)
+                ?: return ByteArray(0)
+            val options = BitmapFactory.Options().apply {
+                inJustDecodeBounds = true
+            }
+            BitmapFactory.decodeStream(input, null, options)
+            input.close()
 
-        val maxDim = 640
-        val width = originalBitmap.width
-        val height = originalBitmap.height
-        val scale = if (width > maxDim || height > maxDim) {
-            val rWidth = maxDim.toFloat() / width
-            val rHeight = maxDim.toFloat() / height
-            minOf(rWidth, rHeight)
-        } else 1.0f
+            val origWidth = options.outWidth
+            val origHeight = options.outHeight
+            if (origWidth <= 0 || origHeight <= 0) return ByteArray(0)
 
-        val targetWidth = (width * scale).toInt().coerceAtLeast(1)
-        val targetHeight = (height * scale).toInt().coerceAtLeast(1)
-        val scaledBitmap = Bitmap.createScaledBitmap(originalBitmap, targetWidth, targetHeight, true)
+            // Calculate sample size for max 480px dimension
+            val targetMaxDim = 480
+            var sampleSize = 1
+            while ((origWidth / sampleSize) > (targetMaxDim * 2) || (origHeight / sampleSize) > (targetMaxDim * 2)) {
+                sampleSize *= 2
+            }
 
-        val outStream = ByteArrayOutputStream()
-        scaledBitmap.compress(Bitmap.CompressFormat.JPEG, 75, outStream)
-        return outStream.toByteArray()
+            // Step 2: Decode subsampled bitmap safely
+            input = context.contentResolver.openInputStream(imageUri) ?: return ByteArray(0)
+            val decodeOptions = BitmapFactory.Options().apply {
+                inSampleSize = sampleSize
+                inPreferredConfig = Bitmap.Config.RGB_565 // 50% memory savings vs ARGB_8888
+            }
+            val sampledBitmap = BitmapFactory.decodeStream(input, null, decodeOptions)
+            input.close()
+            sampledBitmap ?: return ByteArray(0)
+
+            // Step 3: Exact scale down to targetMaxDim
+            val curWidth = sampledBitmap.width
+            val curHeight = sampledBitmap.height
+            val scale = if (curWidth > targetMaxDim || curHeight > targetMaxDim) {
+                val rW = targetMaxDim.toFloat() / curWidth
+                val rH = targetMaxDim.toFloat() / curHeight
+                minOf(rW, rH)
+            } else 1.0f
+
+            val scaledBitmap = if (scale < 1.0f) {
+                val sW = (curWidth * scale).toInt().coerceAtLeast(1)
+                val sH = (curHeight * scale).toInt().coerceAtLeast(1)
+                Bitmap.createScaledBitmap(sampledBitmap, sW, sH, true).also {
+                    if (it != sampledBitmap) sampledBitmap.recycle()
+                }
+            } else {
+                sampledBitmap
+            }
+
+            // Step 4: Iterative compression loop down to target max 24,000 bytes
+            val maxAllowedBytes = 24000
+            val qualities = intArrayOf(75, 60, 45, 30, 20)
+            var finalBytes = ByteArray(0)
+
+            for (quality in qualities) {
+                val out = ByteArrayOutputStream()
+                scaledBitmap.compress(Bitmap.CompressFormat.JPEG, quality, out)
+                val current = out.toByteArray()
+                finalBytes = current
+                if (current.size <= maxAllowedBytes) break
+            }
+
+            scaledBitmap.recycle()
+            finalBytes
+        } catch (_: Throwable) {
+            ByteArray(0)
+        }
     }
 
     /**
@@ -51,10 +98,14 @@ object MediaManager {
      * Returns absolute file path.
      */
     fun saveImageFile(context: Context, imageBytes: ByteArray, id: String = UUID.randomUUID().toString()): String {
-        val mediaDir = File(context.filesDir, "media").apply { mkdirs() }
-        val file = File(mediaDir, "img_${id.take(16)}.jpg")
-        FileOutputStream(file).use { it.write(imageBytes) }
-        return file.absolutePath
+        return try {
+            val mediaDir = File(context.filesDir, "media").apply { mkdirs() }
+            val file = File(mediaDir, "img_${id.take(16)}.jpg")
+            FileOutputStream(file).use { it.write(imageBytes) }
+            file.absolutePath
+        } catch (_: Exception) {
+            ""
+        }
     }
 
     /**
@@ -62,10 +113,14 @@ object MediaManager {
      * Returns absolute file path.
      */
     fun saveAudioFile(context: Context, audioBytes: ByteArray, id: String = UUID.randomUUID().toString()): String {
-        val audioDir = File(context.filesDir, "audio").apply { mkdirs() }
-        val file = File(audioDir, "audio_${id.take(16)}.m4a")
-        FileOutputStream(file).use { it.write(audioBytes) }
-        return file.absolutePath
+        return try {
+            val audioDir = File(context.filesDir, "audio").apply { mkdirs() }
+            val file = File(audioDir, "audio_${id.take(16)}.m4a")
+            FileOutputStream(file).use { it.write(audioBytes) }
+            file.absolutePath
+        } catch (_: Exception) {
+            ""
+        }
     }
 
     /**

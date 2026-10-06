@@ -38,7 +38,9 @@ data class Peer(
     val lastSeenTimestamp: Long = System.currentTimeMillis(),
     val signalBucket: SignalBucket = SignalBucket.NEAR,
     val rssi: Int = -75,
-    val hops: Int = 1
+    val hops: Int = 1,
+    val batteryPercent: Int = 85,
+    val isMuleCapable: Boolean = true
 ) {
     val shortId: String get() = if (id.length >= 8) id.substring(0, 8).uppercase() else id.uppercase()
 }
@@ -55,8 +57,11 @@ data class ChatMessage(
     val timestamp: Long = System.currentTimeMillis(),
     val status: DeliveryStatus = DeliveryStatus.SENDING,
     val replyToId: String? = null,
+    val reaction: String? = null,
     val reactions: Map<String, Int> = emptyMap(), // emoji -> count
-    val isOutgoing: Boolean = true
+    val isEdited: Boolean = false,
+    val isOutgoing: Boolean = true,
+    val powDifficulty: Int = 12
 )
 
 data class Conversation(
@@ -75,3 +80,46 @@ data class Conversation(
         const val PUBLIC_CHANNEL_ID = "channel_public_nearby"
     }
 }
+
+/**
+ * Dead-Drop Geofenced Droplet:
+ * Secret note bound to physical GPS coordinates and BLE beacons,
+ * stored & relayed by passing mesh nodes, unveiling only when in vicinity.
+ */
+data class GeofenceDroplet(
+    val id: String,
+    val title: String,
+    val encryptedNote: String,
+    val latitude: Double,
+    val longitude: Double,
+    val radiusMeters: Float = 100f,
+    val authorNickname: String,
+    val authorIdHex: String,
+    val timestamp: Long = System.currentTimeMillis(),
+    val isUnlocked: Boolean = false,
+    val unlockedContent: String? = null
+)
+
+/**
+ * Sneakernet Data Mule Metrics & Status
+ */
+data class DataMuleStats(
+    val packetsCarried: Int = 0,
+    val packetsDelivered: Int = 0,
+    val physicalKilometersTraveled: Float = 0f,
+    val isMulingActive: Boolean = true
+)
+
+/**
+ * Peer-to-Peer Identity Introduction Voucher:
+ * Peer A cryptographically signs an endorsement introducing Peer B to Peer C.
+ */
+data class IntroductionVoucher(
+    val introducerNickname: String,
+    val introducerPeerIdHex: String,
+    val subjectNickname: String,
+    val subjectPeerIdHex: String,
+    val targetPeerIdHex: String,
+    val signatureHex: String,
+    val timestamp: Long = System.currentTimeMillis()
+)

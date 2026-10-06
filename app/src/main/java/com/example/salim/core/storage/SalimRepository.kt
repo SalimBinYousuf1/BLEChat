@@ -173,6 +173,19 @@ class SalimRepository(
         conversationDao.markAsRead(convId)
     }
 
+    suspend fun clearMessagesForConversation(convId: String) {
+        messageDao.deleteConversationMessages(convId)
+        conversationDao.updateLastMessage(convId, "", System.currentTimeMillis(), 0)
+    }
+
+    suspend fun setConversationPinned(convId: String, isPinned: Boolean) {
+        conversationDao.setPinned(convId, isPinned)
+    }
+
+    suspend fun setConversationMuted(convId: String, isMuted: Boolean) {
+        conversationDao.setMuted(convId, isMuted)
+    }
+
     suspend fun deleteConversation(convId: String) {
         conversationDao.deleteConversation(convId)
         messageDao.deleteConversationMessages(convId)
@@ -183,6 +196,14 @@ class SalimRepository(
         return messageDao.getMessagesForConversation(convId).map { list ->
             list.map { it.toChatMessage() }
         }
+    }
+
+    suspend fun editMessage(messageId: String, newContent: String) {
+        messageDao.updateMessageContent(messageId, newContent)
+    }
+
+    suspend fun reactToMessage(messageId: String, reaction: String?) {
+        messageDao.updateMessageReaction(messageId, reaction)
     }
 
     suspend fun saveMessage(message: ChatMessage) {
